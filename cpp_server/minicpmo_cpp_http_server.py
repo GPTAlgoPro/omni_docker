@@ -69,9 +69,9 @@ def auto_detect_llm_model(model_dir: str) -> str:
     
     # 按优先级排序的模式
     priority_patterns = [
-        "*Q4_0*.gguf",
         "*Q4_K_M*.gguf",
         "*Q4_K_S*.gguf", 
+        "*Q4_0*.gguf",
         "*Q8_0*.gguf",
         "*Q5_K_M*.gguf",
         "*F16*.gguf",
