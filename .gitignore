@@ -5,6 +5,7 @@
 !.gitignore
 
 # --- Top-level files ---
+!README.md
 !deploy_all.sh
 !DEPLOY.md
 !docker-compose.yml
