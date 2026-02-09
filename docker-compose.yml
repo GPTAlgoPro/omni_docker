@@ -1,0 +1,82 @@
+# MiniCPM-o 前后端联调 Docker Compose 配置 (ARM优化版)
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: minicpmo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - minicpmo-net
+
+  livekit:
+    image: livekit/livekit-server:v1.5.3
+    container_name: minicpmo-livekit
+    restart: unless-stopped
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+      - "50000-50100:50000-50100/udp"
+    volumes:
+      - ./omini_backend_code/config/livekit.yaml:/livekit.yaml:ro
+    command: --config /livekit.yaml
+    networks:
+      - minicpmo-net
+
+  backend:
+    image: modelbest-registry.cn-beijing.cr.aliyuncs.com/modelbest/minicpm-web-backend:release_local-202602041743-4f385b
+    pull_policy: never  # ← 强制使用本地镜像，不从云端拉取
+    platform: linux/amd64  # ← 使用amd64平台（镜像实际架构）
+    container_name: minicpmo-backend
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # ← 允许容器访问主机
+
+    ports:
+      - "18021:8021" # ⭐ 修复冲突
+      - "18022:8022"
+
+    environment:
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - INFERENCE_REGISTER_ENABLED=true
+
+    depends_on:
+      - livekit
+      - redis
+
+    networks:
+      - minicpmo-net
+
+  frontend:
+    image: modelbest-registry.cn-beijing.cr.aliyuncs.com/modelbest/three-o-h-100:kol-external-202602041835-b7c0c5
+    pull_policy: never  # ← 强制使用本地镜像，不从云端拉取
+    platform: linux/amd64
+    container_name: minicpmo-frontend
+    restart: unless-stopped
+
+    ports:
+      - "3000:80"
+
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:18021
+      - NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880
+
+    depends_on:
+      - backend
+
+    networks:
+      - minicpmo-net
+
+networks:
+  minicpmo-net:
+    driver: bridge

@@ -1,0 +1,22 @@
+# Ignore everything by default
+*
+
+# Allow .gitignore itself
+!.gitignore
+
+# --- Top-level files ---
+!deploy_all.sh
+!DEPLOY.md
+!docker-compose.yml
+!nginx.conf
+
+# --- cpp_server/ ---
+!cpp_server/
+!cpp_server/minicpmo_cpp_http_server.py
+!cpp_server/README.md
+!cpp_server/requirements.txt
+
+# --- omini_backend_code/config/livekit.yaml ---
+!omini_backend_code/
+!omini_backend_code/config/
+!omini_backend_code/config/livekit.yaml

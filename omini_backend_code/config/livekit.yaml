@@ -1,0 +1,36 @@
+# LiveKit 服务器配置 - Docker 环境
+port: 7880
+log_level: info
+
+# WebRTC配置
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 50100
+  # 禁用外部 IP 探测，使用指定的 node_ip
+  use_external_ip: false
+  # macOS Docker Desktop 端口映射只绑定到 127.0.0.1
+  # 必须使用 127.0.0.1 才能让浏览器的 WebRTC ICE 连接通过 Docker 端口映射
+  node_ip: "192.168.77.138"
+  # 同时启用 enable_loopback_candidate 确保 loopback 候选可用
+  enable_loopback_candidate: true
+
+# 房间配置
+room:
+  max_participants: 10
+  empty_timeout: 300
+
+# API密钥配置（与 docker-compose.yml 和 dev.yaml 保持一致）
+keys:
+  devkey: secret
+
+# LiveKit内置TURN服务器配置（帮助穿透NAT，确保前端能连接）
+turn:
+  enabled: true
+  # macOS Docker Desktop: 使用 127.0.0.1（与 node_ip 一致）
+  domain: "192.168.77.138"
+  # UDP端口
+  udp_port: 7882
+  # 不使用TLS（本地开发）
+  tls_port: 0
+  external_tls: false
